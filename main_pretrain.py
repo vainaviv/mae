@@ -71,7 +71,7 @@ def get_args_parser():
     parser.add_argument('--warmup_epochs', type=int, default=40, metavar='N',
                         help='epochs to warmup LR')
 
-    # Dataset parameters
+    # Dataset parameters -- VAINAVI: put my pretraining images here
     parser.add_argument('--data_path', default='/datasets01/imagenet_full_size/061417/', type=str,
                         help='dataset path')
 

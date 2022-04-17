@@ -1,0 +1,47 @@
+/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torchvision/transforms/transforms.py:803: UserWarning: Argument interpolation should be of type InterpolationMode instead of int. Please, use InterpolationMode enum.
+  warnings.warn(
+/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/cuda/__init__.py:104: UserWarning: 
+A100-PCIE-40GB with CUDA capability sm_80 is not compatible with the current PyTorch installation.
+The current PyTorch install supports CUDA capabilities sm_37 sm_50 sm_60 sm_70.
+If you want to use the A100-PCIE-40GB GPU with PyTorch, please check the instructions at https://pytorch.org/get-started/locally/
+
+  warnings.warn(incompatible_device_warn.format(device_name, capability, " ".join(arch_list), device_name))
+submitit ERROR (2022-04-17 15:36:29,716) - Submitted job triggered an exception
+Traceback (most recent call last):
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/submitit/core/_submit.py", line 11, in <module>
+    submitit_main()
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/submitit/core/submission.py", line 72, in submitit_main
+    process_job(args.folder)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/submitit/core/submission.py", line 65, in process_job
+    raise error
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/submitit/core/submission.py", line 54, in process_job
+    result = delayed.result()
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/submitit/core/utils.py", line 133, in result
+    self._result = self.function(*self.args, **self.kwargs)
+  File "submitit_pretrain.py", line 59, in __call__
+    trainer.main(self.args)
+  File "/home/vainavi/mae/main_pretrain.py", line 191, in main
+    train_stats = train_one_epoch(
+  File "/home/vainavi/mae/engine_pretrain.py", line 48, in train_one_epoch
+    loss, _, _ = model(samples, mask_ratio=args.mask_ratio)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/vainavi/mae/models_mae.py", line 217, in forward
+    latent, mask, ids_restore = self.forward_encoder(imgs, mask_ratio)
+  File "/home/vainavi/mae/models_mae.py", line 152, in forward_encoder
+    x = self.patch_embed(x)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/timm/models/vision_transformer.py", line 165, in forward
+    x = self.proj(x).flatten(2).transpose(1, 2)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/nn/modules/module.py", line 889, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 399, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/vainavi/miniconda3/envs/mae_env/lib/python3.8/site-packages/torch/nn/modules/conv.py", line 395, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: CUDA error: no kernel image is available for execution on the device
