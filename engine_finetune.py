@@ -41,7 +41,6 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         print('log_dir: {}'.format(log_writer.log_dir))
 
     for data_iter_step, (samples, targets) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
-
         # we use a per iteration (instead of per epoch) lr scheduler
         if data_iter_step % accum_iter == 0:
             lr_sched.adjust_learning_rate(optimizer, data_iter_step / len(data_loader) + epoch, args)
@@ -49,16 +48,15 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
         samples = samples.to(device, non_blocking=True)
         targets = targets.to(device, non_blocking=True)
 
-        if mixup_fn is not None:
-            samples, targets = mixup_fn(samples, targets)
+        # if mixup_fn is not None:
+        #     samples, targets = mixup_fn(samples, targets)
+        #     print("TARGETS THIRD:")
+        #     print(targets.shape)
 
         with torch.cuda.amp.autocast():
-            outputs = model(samples)
-            print("outputs:")
-            print(outputs)
-            print("targets:")
-            print(targets)
-            loss = criterion(outputs, targets)
+            _, outputs, _ = model(samples)
+            outputs = model.unpatchify(outputs)
+            loss = torch.nn.BCEWithLogitsLoss()(outputs, targets) #criterion(outputs, targets)
 
         loss_value = loss.item()
 

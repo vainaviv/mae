@@ -21,6 +21,7 @@ import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
+from custom_dataset import ConditioningDataset 
 
 import timm
 
@@ -125,8 +126,11 @@ def main(args):
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train'), transform=transform_train)
-    print(dataset_train)
+    # VAINAVI: make custom dataloader like keypoints for hulk
+    dataset_dir = args.data_path
+    print(args.data_path)
+    dataset_train = ConditioningDataset('%s/train/images'%dataset_dir, '%s/train/annots'%dataset_dir, 100, 100, augment=False)
+    # dataset_train = torch.utils.data.Dataset(train_dataset, batch_size = args.batch_size, shuffle=True, num_workers = args.num_workers)
 
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
@@ -194,7 +198,7 @@ def main(args):
             log_writer=log_writer,
             args=args
         )
-        if args.output_dir and (epoch % 20 == 0 or epoch + 1 == args.epochs):
+        if args.output_dir and (epoch % 100 == 0 or epoch + 1 == args.epochs):
             misc.save_model(
                 args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                 loss_scaler=loss_scaler, epoch=epoch)

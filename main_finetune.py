@@ -20,6 +20,7 @@ from pathlib import Path
 import torch
 import torch.backends.cudnn as cudnn
 from torch.utils.tensorboard import SummaryWriter
+from custom_dataset import ConditioningDataset
 
 import timm
 
@@ -34,7 +35,7 @@ from util.datasets import build_dataset
 from util.pos_embed import interpolate_pos_embed
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
 
-import models_vit
+import models_mae
 
 from engine_finetune import train_one_epoch, evaluate
 
@@ -112,7 +113,7 @@ def get_args_parser():
     parser.add_argument('--finetune', default='',
                         help='finetune from checkpoint')
     parser.add_argument('--global_pool', action='store_true')
-    parser.set_defaults(global_pool=True)
+    parser.set_defaults(global_pool=False)
     parser.add_argument('--cls_token', action='store_false', dest='global_pool',
                         help='Use class token instead of global pool for classification')
 
@@ -170,8 +171,12 @@ def main(args):
 
     cudnn.benchmark = True
 
-    dataset_train = build_dataset(is_train=True, args=args)
-    dataset_val = build_dataset(is_train=False, args=args)
+    # dataset_train = build_dataset(is_train=True, args=args)
+    # dataset_val = build_dataset(is_train=False, args=args)
+
+    dataset_dir = 'corresponding_segment'
+    dataset_train = ConditioningDataset('train_sets/%s/train/images'%dataset_dir, 'train_sets/%s/train/annots'%dataset_dir, 100, 100, finetune=True)
+    dataset_val = ConditioningDataset('train_sets/%s/train/images'%dataset_dir, 'train_sets/%s/train/annots'%dataset_dir, 100, 100, finetune=True)
 
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
@@ -224,11 +229,11 @@ def main(args):
             prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
             label_smoothing=args.smoothing, num_classes=args.nb_classes)
     
-    model = models_vit.__dict__[args.model](
-        num_classes=args.nb_classes,
-        drop_path_rate=args.drop_path,
-        global_pool=args.global_pool,
-    )
+    # model = models_mae.__dict__[args.model](
+    #     global_pool=args.global_pool,
+    # )
+
+    model = models_mae.__dict__[args.model]()
 
     if args.finetune and not args.eval:
         checkpoint = torch.load(args.finetune, map_location='cpu')
@@ -245,16 +250,19 @@ def main(args):
         interpolate_pos_embed(model, checkpoint_model)
 
         # load pre-trained model
-        msg = model.load_state_dict(checkpoint_model, strict=False)
+        msg = model.load_state_dict(checkpoint_model, strict=True)
         print(msg)
 
-        if args.global_pool:
-            assert set(msg.missing_keys) == {'head.weight', 'head.bias', 'fc_norm.weight', 'fc_norm.bias'}
-        else:
-            assert set(msg.missing_keys) == {'head.weight', 'head.bias'}
+        # if args.global_pool:
+        #     assert set(msg.missing_keys) == {'head.weight', 'head.bias', 'fc_norm.weight', 'fc_norm.bias'}
+        # else:
+        #     assert set(msg.missing_keys) == {'head.weight', 'head.bias'}
+        # print("MISSING KEYS:")
+        # print(msg.missing_keys)
+        # assert set(msg.missing_keys) == {}
 
         # manually initialize fc layer
-        trunc_normal_(model.head.weight, std=2e-5)
+        # trunc_normal_(model.head.weight, std=2e-5)
 
     model.to(device)
 
@@ -281,7 +289,6 @@ def main(args):
 
     # build optimizer with layer-wise lr decay (lrd)
     param_groups = lrd.param_groups_lrd(model_without_ddp, args.weight_decay,
-        no_weight_decay_list=model_without_ddp.no_weight_decay(),
         layer_decay=args.layer_decay
     )
     optimizer = torch.optim.AdamW(param_groups, lr=args.lr)

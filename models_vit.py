@@ -43,12 +43,14 @@ class VisionTransformer(timm.models.vision_transformer.VisionTransformer):
         for blk in self.blocks:
             x = blk(x)
 
+        # VAINAVI: create decoder block from scratch from models_mae
+
         if self.global_pool:
             x = x[:, 1:, :].mean(dim=1)  # global pool without cls token
             outcome = self.fc_norm(x)
         else:
             x = self.norm(x)
-            outcome = x[:, 0]
+            outcome = x[:, 0] #VAINAVI: this is classification step
 
         return outcome
 

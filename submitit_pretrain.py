@@ -19,7 +19,7 @@ import submitit
 def parse_args():
     trainer_parser = trainer.get_args_parser()
     parser = argparse.ArgumentParser("Submitit for MAE pretrain", parents=[trainer_parser])
-    parser.add_argument("--ngpus", default=8, type=int, help="Number of gpus to request on each node")
+    parser.add_argument("--ngpus", default=1, type=int, help="Number of gpus to request on each node")
     parser.add_argument("--nodes", default=2, type=int, help="Number of nodes to request")
     parser.add_argument("--timeout", default=4320, type=int, help="Duration of the job")
     parser.add_argument("--job_dir", default="", type=str, help="Job dir. Leave empty for automatic.")
@@ -77,7 +77,9 @@ class Trainer(object):
         job_env = submitit.JobEnvironment()
         self.args.output_dir = Path(str(self.args.output_dir).replace("%j", str(job_env.job_id)))
         self.args.log_dir = self.args.output_dir
-        self.args.gpu = job_env.local_rank
+        self.args.gpu =  job_env.local_rank
+        # print("STUFF")
+        # print(job_env.local_rank)
         self.args.rank = job_env.global_rank
         self.args.world_size = job_env.num_tasks
         print(f"Process group: {job_env.num_tasks} tasks, rank: {job_env.global_rank}")
