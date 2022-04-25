@@ -121,18 +121,20 @@ def main(args):
     cudnn.benchmark = True
 
     # simple augmentation
+    # transform_train = transforms.Compose([
+    #         transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
+    #         transforms.RandomHorizontalFlip(),
+    #         transforms.ToTensor(),
+    #         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
     transform_train = transforms.Compose([
-            transforms.RandomResizedCrop(args.input_size, scale=(0.2, 1.0), interpolation=3),  # 3 is bicubic
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
-    # VAINAVI: make custom dataloader like keypoints for hulk
+        transforms.ToTensor()])
     dataset_dir = args.data_path
-    print(args.data_path)
-    dataset_train = ConditioningDataset('%s/train/images'%dataset_dir, '%s/train/annots'%dataset_dir, 100, 100, augment=False)
+    # dataset_train = ConditioningDataset('%s/train/images/dummy_class'%dataset_dir, '%s/train/annots'%dataset_dir, 100, 100, augment=False)
+    # VAINAVI: probe dataset and see if all images look good
     # dataset_train = torch.utils.data.Dataset(train_dataset, batch_size = args.batch_size, shuffle=True, num_workers = args.num_workers)
+    dataset_train = datasets.ImageFolder(os.path.join(args.data_path, 'train/images'), transform=transform_train)
 
-    if True:  # args.distributed:
+    if True:  # args.distributed: 
         num_tasks = misc.get_world_size()
         global_rank = misc.get_rank()
         sampler_train = torch.utils.data.DistributedSampler(

@@ -124,6 +124,7 @@ class ConditioningDataset(Dataset):
             mm_gauss = torch.tensor(np.concatenate((mm_gauss, mm_gauss, mm_gauss)))
             return img, mm_gauss
         else:
+            
             return img
     
     def __len__(self):
