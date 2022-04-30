@@ -19,3 +19,4 @@ def adjust_learning_rate(optimizer, epoch, args):
         else:
             param_group["lr"] = lr
     return lr
+    # return 0.0000015

@@ -50,7 +50,7 @@ if __name__ == '__main__':
         dataset_val, sampler=sampler_val,
         batch_size=1,
         num_workers=1,
-        pin_memory=True,
+        pin_memory=True, 
         drop_last=False
     )
 
